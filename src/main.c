@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include <stdio.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -63,6 +64,10 @@ static void MX_LPUART1_UART_Init(void);
   * @brief  The application entry point.
   * @retval int
   */
+int _io_putchar(int ch);
+int _write(char *ptr, int len);
+
+
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -88,19 +93,16 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_LPUART1_UART_Init();
-  /* USER CODE BEGIN 2 */
 
-  /* USER CODE END 2 */
+  char Hello[14] = "Hewwo World!\r\n";
+
 
   /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
+	_write(Hello,14);
+	  HAL_Delay(1000);
   }
-  /* USER CODE END 3 */
 }
 
 /**
@@ -147,6 +149,20 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 }
+
+int __io_putchar(int ch){
+	(void) HAL_UART_Transmit(&hlpuart1, (unsigned char *)&ch, 1, 0xFFFFU);
+	return ch;
+	}
+int _write(char *ptr, int len)
+{
+	for(int i =0; i < len; i++){
+		(void) __io_putchar(*ptr++);
+	}
+	return len;
+}
+
+
 
 /**
   * @brief LPUART1 Initialization Function

@@ -78,6 +78,10 @@ $(ALL_OBJS):
 clean:
 	@rm -f $(ALL_OBJS) $(TARGET)
 
+#Flash
+flash:
+	openocd -f ./openocd.cfg
+
 #Debug
 gdb-server_stlink:
 	st-util
