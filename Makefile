@@ -15,13 +15,13 @@ ASM_FILES = $(wildcard $(SRC_DIR)*.s) $(wildcard $(SRC_DIR)*/*.s)
 LD_SCRIPT = $(SRC_DIR)/device/STM32G431RBTX_FLASH.ld #TODO see dif between normal and _FLASH
 
 INCLUDES  = -I$(INC_DIR)
-INCLUDES += -I$(INC_DIR)hal/
+INCLUDES += -I$(INC_DIR)hal/ #TODO FIND
 
 
 #TODO PULL FROM THE CUBE TO ACTUALLY GREP TO
 ASM_FILES += $(VENDOR_ROOT)Drivers/CMSIS/Device/ST/STM32G4xx/Source/Templates/gcc/startup_stm32g431xx.s
-SRC_FILES += $(VENDOR_ROOT)Drivers/CMSIS/Device/ST/STM32G4xx/Source/Templates/system_stm32g4xx.c
-SRC_FILES += $(VENDOR_ROOT)Drivers/BSP/STM32G4xx_Nucleo_144/stm32g4xx_nucleo_144.c
+#SRC_FILES += $(VENDOR_ROOT)Drivers/CMSIS/Device/ST/STM32G4xx/Source/Templates/system_stm32g4xx.c
+SRC_FILES += $(VENDOR_ROOT)Drivers/BSP/STM32G4xx_Nucleo/stm32g4xx_nucleo.c #TODO CHECK
 SRC_FILES += $(VENDOR_ROOT)Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal.c
 SRC_FILES += $(VENDOR_ROOT)Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_cortex.c
 SRC_FILES += $(VENDOR_ROOT)Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_dma.c
@@ -33,13 +33,14 @@ SRC_FILES += $(VENDOR_ROOT)Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_pwr_ex
 SRC_FILES += $(VENDOR_ROOT)Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_rcc.c
 SRC_FILES += $(VENDOR_ROOT)Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_rcc_ex.c
 SRC_FILES += $(VENDOR_ROOT)Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_uart.c
+SRC_FILES += $(VENDOR_ROOT)Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_uart_ex.c
 
 
 #TODO VERIFY
 INCLUDES += -I$(VENDOR_ROOT)Drivers/CMSIS/Core/Include
 INCLUDES += -I$(VENDOR_ROOT)Drivers/CMSIS/Device/ST/STM32G4xx/Include
 INCLUDES += -I$(VENDOR_ROOT)Drivers/STM32G4xx_HAL_Driver/Inc
-INCLUDES += -I$(VENDOR_ROOT)Drivers/Drivers/BSP/STM32G4xx_Nucleo_144
+INCLUDES += -I$(VENDOR_ROOT)Drivers/BSP/STM32G4xx_Nucleo
 
 
 CFLAGS  = -g -O0 -Wall -Wextra -Warray-bounds -Wno-unused-parameter
