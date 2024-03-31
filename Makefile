@@ -15,7 +15,6 @@ ASM_FILES = $(wildcard $(SRC_DIR)*.s) $(wildcard $(SRC_DIR)*/*.s)
 LD_SCRIPT = $(SRC_DIR)/device/STM32G431RBTX_FLASH.ld #TODO see dif between normal and _FLASH
 
 INCLUDES  = -I$(INC_DIR)
-INCLUDES += -I$(INC_DIR)hal/ #TODO FIND
 
 
 #TODO PULL FROM THE CUBE TO ACTUALLY GREP TO
