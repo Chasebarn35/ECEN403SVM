@@ -31,12 +31,15 @@ SRC_FILES += $(VENDOR_ROOT)Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_pwr.c
 SRC_FILES += $(VENDOR_ROOT)Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_pwr_ex.c
 SRC_FILES += $(VENDOR_ROOT)Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_rcc.c
 SRC_FILES += $(VENDOR_ROOT)Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_rcc_ex.c
+SRC_FILES += $(VENDOR_ROOT)Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_tim.c
+SRC_FILES += $(VENDOR_ROOT)Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_tim_ex.c
 SRC_FILES += $(VENDOR_ROOT)Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_uart.c
 SRC_FILES += $(VENDOR_ROOT)Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_uart_ex.c
 
 
 #TODO VERIFY
 INCLUDES += -I$(VENDOR_ROOT)Drivers/CMSIS/Core/Include
+INCLUDES += -I$(VENDOR_ROOT)Drivers/CMSIS/DSP/Include
 INCLUDES += -I$(VENDOR_ROOT)Drivers/CMSIS/Device/ST/STM32G4xx/Include
 INCLUDES += -I$(VENDOR_ROOT)Drivers/STM32G4xx_HAL_Driver/Inc
 INCLUDES += -I$(VENDOR_ROOT)Drivers/BSP/STM32G4xx_Nucleo

@@ -28,7 +28,7 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32g4xx_hal.h"
-
+#include <arm_math.h>
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -42,6 +42,18 @@ extern "C" {
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
 
+#define _U_DC 208
+#define _SQRT3 1.73205081
+#define _PIdiv3 1.04719755
+
+
+extern float32_t U_alpha, U_beta;
+extern float32_t ThetaV, ThetaC;
+extern float32_t counterfrequency;
+extern float32_t U_max;
+extern float32_t sinevalue,cosinevalue;
+extern float32_t DFreq;
+extern uint16_t *switchtime[3];
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -59,12 +71,35 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define B1_Pin GPIO_PIN_13
 #define B1_GPIO_Port GPIOC
-#define LPUART1_TX_Pin GPIO_PIN_2
-#define LPUART1_TX_GPIO_Port GPIOA
-#define LPUART1_RX_Pin GPIO_PIN_3
-#define LPUART1_RX_GPIO_Port GPIOA
-#define LD2_Pin GPIO_PIN_5
-#define LD2_GPIO_Port GPIOA
+#define B1_EXTI_IRQn EXTI15_10_IRQn
+#define LEDPin_Pin GPIO_PIN_5
+#define LEDPin_GPIO_Port GPIOA
+#define LCC2_Pin GPIO_PIN_12
+#define LCC2_GPIO_Port GPIOB
+#define LCC1_Pin GPIO_PIN_13
+#define LCC1_GPIO_Port GPIOB
+#define LBB2_Pin GPIO_PIN_14
+#define LBB2_GPIO_Port GPIOB
+#define LBB1_Pin GPIO_PIN_15
+#define LBB1_GPIO_Port GPIOB
+#define LAA2_Pin GPIO_PIN_6
+#define LAA2_GPIO_Port GPIOC
+#define LAA1_Pin GPIO_PIN_7
+#define LAA1_GPIO_Port GPIOC
+#define Start_Pin GPIO_PIN_8
+#define Start_GPIO_Port GPIOC
+#define Short_Pin GPIO_PIN_8
+#define Short_GPIO_Port GPIOA
+#define Short_EXTI_IRQn EXTI9_5_IRQn
+#define V_c_Pin GPIO_PIN_9
+#define V_c_GPIO_Port GPIOA
+#define V_c_EXTI_IRQn EXTI9_5_IRQn
+#define V_b_Pin GPIO_PIN_10
+#define V_b_GPIO_Port GPIOA
+#define V_b_EXTI_IRQn EXTI15_10_IRQn
+#define V_a_Pin GPIO_PIN_11
+#define V_a_GPIO_Port GPIOA
+#define V_a_EXTI_IRQn EXTI15_10_IRQn
 #define T_SWDIO_Pin GPIO_PIN_13
 #define T_SWDIO_GPIO_Port GPIOA
 #define T_SWCLK_Pin GPIO_PIN_14

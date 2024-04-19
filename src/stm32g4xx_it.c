@@ -55,10 +55,13 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern UART_HandleTypeDef hlpuart1;
+extern TIM_HandleTypeDef htim6;
+extern TIM_HandleTypeDef htim7;
 
-/* USER CODE BEGIN EV */
 
-/* USER CODE END EV */
+
+
 
 /******************************************************************************/
 /*           Cortex-M4 Processor Interruption and Exception Handlers          */
@@ -197,6 +200,114 @@ void SysTick_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32g4xx.s).                    */
 /******************************************************************************/
+
+/**
+  * @brief This function handles EXTI line[9:5] interrupts.
+  */
+void EXTI9_5_IRQHandler(void)
+{
+	if(__HAL_GPIO_EXTI_GET_IT(Short_Pin)!=RESET)
+		{
+		__HAL_GPIO_EXTI_CLEAR_IT(Short_Pin);
+		HAL_GPIO_WritePin(GPIOC,Start_Pin,GPIO_PIN_RESET);//TURNS OFF START
+		HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON,PWR_STOPENTRY_WFI);
+		}
+
+	if(__HAL_GPIO_EXTI_GET_IT(V_c_Pin)!=RESET){
+    		__HAL_GPIO_EXTI_CLEAR_IT(V_c_Pin);
+		//TODO MORE WITH V_C
+	}
+
+
+
+  HAL_GPIO_EXTI_IRQHandler(V_c_Pin);
+}
+
+/**
+  * @brief This function handles EXTI line[15:10] interrupts.
+  */
+void EXTI15_10_IRQHandler(void)
+{
+
+	if(__HAL_GPIO_EXTI_GET_IT(V_a_Pin)!=RESET){
+    		__HAL_GPIO_EXTI_CLEAR_IT(V_a_Pin);
+		//TODO MORE WITH V_A
+	}
+
+	if(__HAL_GPIO_EXTI_GET_IT(V_b_Pin)!=RESET){
+    		__HAL_GPIO_EXTI_CLEAR_IT(V_b_Pin);
+		//TODO MORE WITH V_B
+	}
+
+	//INITIALIZE STARTUP AND WRITE 1 TO START PIN
+	if(__HAL_GPIO_EXTI_GET_IT(B1_Pin)!=RESET){
+    		__HAL_GPIO_EXTI_CLEAR_IT(B1_Pin);
+		HAL_GPIO_WritePin(GPIOC,Start_Pin,GPIO_PIN_SET);//TURN ON START
+								//TODO INITIALIZE CLOCKS POTENTIALLY?
+		HAL_TIM_Base_Start(&htim6);
+		HAL_TIM_Base_Start(&htim7);
+	}
+
+  /* USER CODE END EXTI15_10_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(V_b_Pin);
+  HAL_GPIO_EXTI_IRQHandler(V_a_Pin);
+  HAL_GPIO_EXTI_IRQHandler(B1_Pin);
+  /* USER CODE BEGIN EXTI15_10_IRQn 1 */
+
+  /* USER CODE END EXTI15_10_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM6 global interrupt, DAC1 and DAC3 channel underrun error interrupts.
+  */
+//10KHz interrupt
+void TIM6_DAC_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM6_DAC_IRQn 0 */
+
+  /* USER CODE END TIM6_DAC_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim6);
+
+}
+
+/**
+  * @brief This function handles TIM7 global interrupt.
+  */
+//50KHz Interrupt
+void TIM7_IRQHandler(void)
+{
+
+  HAL_TIM_IRQHandler(&htim7);
+	
+	if(TIM_GET_ITSTATUS(&htim7,TIM_IT_UPDATE)!=RESET){
+		//calculate park transformation
+		//transform Va or Vb
+
+
+	//TODO IF Theta
+	ThetaV+=(60*M_PI)/50000;//Reset via interrupt pin
+	ThetaC+=(DFreq*M_PI)/50000;//DFreq Increment every 50Khz
+	if(ThetaC >= (2*M_PI))
+		ThetaC = 0;
+  	HAL_GPIO_TogglePin(LEDPin_GPIO_Port,LEDPin_Pin);
+	}
+}
+
+
+
+/**
+  * @brief This function handles LPUART1 global interrupt.
+  */
+void LPUART1_IRQHandler(void)
+{
+  /* USER CODE BEGIN LPUART1_IRQn 0 */
+
+  /* USER CODE END LPUART1_IRQn 0 */
+  HAL_UART_IRQHandler(&hlpuart1);
+  /* USER CODE BEGIN LPUART1_IRQn 1 */
+
+  /* USER CODE END LPUART1_IRQn 1 */
+}
 
 /* USER CODE BEGIN 1 */
 
