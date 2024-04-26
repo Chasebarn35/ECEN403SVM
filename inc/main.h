@@ -54,6 +54,11 @@ extern float32_t U_max;
 extern float32_t sinevalue,cosinevalue;
 extern float32_t DFreq;
 extern uint16_t *switchtime[3];
+extern uint16_t adrT;
+extern uint16_t SVM[180];
+extern uint16_t currVec;
+extern uint16_t hasStarted;
+
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -74,18 +79,6 @@ void Error_Handler(void);
 #define B1_EXTI_IRQn EXTI15_10_IRQn
 #define LEDPin_Pin GPIO_PIN_5
 #define LEDPin_GPIO_Port GPIOA
-#define LCC2_Pin GPIO_PIN_12
-#define LCC2_GPIO_Port GPIOB
-#define LCC1_Pin GPIO_PIN_13
-#define LCC1_GPIO_Port GPIOB
-#define LBB2_Pin GPIO_PIN_14
-#define LBB2_GPIO_Port GPIOB
-#define LBB1_Pin GPIO_PIN_15
-#define LBB1_GPIO_Port GPIOB
-#define LAA2_Pin GPIO_PIN_6
-#define LAA2_GPIO_Port GPIOC
-#define LAA1_Pin GPIO_PIN_7
-#define LAA1_GPIO_Port GPIOC
 #define Start_Pin GPIO_PIN_8
 #define Start_GPIO_Port GPIOC
 #define Short_Pin GPIO_PIN_8
@@ -106,6 +99,18 @@ void Error_Handler(void);
 #define T_SWCLK_GPIO_Port GPIOA
 #define T_SWO_Pin GPIO_PIN_3
 #define T_SWO_GPIO_Port GPIOB
+#define LAA1_Pin GPIO_PIN_4
+#define LAA1_GPIO_Port GPIOB
+#define LAA2_Pin GPIO_PIN_5
+#define LAA2_GPIO_Port GPIOB
+#define LBB1_Pin GPIO_PIN_6
+#define LBB1_GPIO_Port GPIOB
+#define LBB2_Pin GPIO_PIN_7
+#define LBB2_GPIO_Port GPIOB
+#define LCC1_Pin GPIO_PIN_8
+#define LCC1_GPIO_Port GPIOB
+#define LCC2_Pin GPIO_PIN_9
+#define LCC2_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
