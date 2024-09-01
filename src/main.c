@@ -72,7 +72,7 @@ float32_t sinevalue=0,cosinevalue=0;
 float32_t DFreq = 60;//TODO REPLACE WITH UART COMMUNICATION
 uint16_t *switchtime[3] = {0,0,0}; 
 uint16_t adrT = 0;
-uint16_t SVM[180] = { //180 different instances
+uint16_t SVM[180] = { //180 different instances TODO
 	0x01,0x02,0x03,0x02,0x01,//Aa->Ab->Ac->Ab->Aa
 	0x04,0x08,0x0C,0x08,0x04,//Ba->Bb->Bc->Bb->Ba
 	0x10,0x20,0x30,0x20,0x10 //Ca->Cb->Cc->Cb->Ca
