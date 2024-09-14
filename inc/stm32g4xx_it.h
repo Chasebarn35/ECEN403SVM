@@ -28,6 +28,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include <stdlib.h> //atof
+#include <stdio.h> //snprintf
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -60,6 +62,8 @@ void EXTI15_10_IRQHandler(void);
 void TIM6_DAC_IRQHandler(void);
 void TIM7_IRQHandler(void);
 void LPUART1_IRQHandler(void);
+
+int __io_putchar(int ch);
 /* USER CODE BEGIN EFP */
 
 /* USER CODE END EFP */

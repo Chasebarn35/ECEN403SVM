@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32g4xx_it.h"
+#include "algos.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
@@ -58,7 +59,6 @@
 extern UART_HandleTypeDef hlpuart1;
 extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim7;
-
 
 
 
@@ -230,7 +230,7 @@ void EXTI15_10_IRQHandler(void)
 		ThetaV=0;
 	}
 
-	if(__HAL_GPIO_EXTI_GET_IT(V_b_Pin)!=RESET){
+	if(__HAL_GPIO_EXTI_GET_IT(V_b_Pin)!=RESET){ //TODO POTENTIALLY REMOVE?
 		__HAL_GPIO_EXTI_CLEAR_IT(V_b_Pin);
 		//TODO MORE WITH V_B
 	}
@@ -261,7 +261,7 @@ void EXTI15_10_IRQHandler(void)
 void TIM6_DAC_IRQHandler(void)
 {
 	if(TIM_GET_ITSTATUS(&htim6,TIM_IT_UPDATE)!=RESET){
-		GPIOB->BSRR = (SVM[5*currVec + adrT] <<4);//Temporary, write to 6 pins
+		PhaseChange(SVM[5*currVec + adrT]);
 		adrT++;
 		if(adrT>=5){
 			adrT = 0; //TODO make adrT larger, determine adrT
@@ -298,9 +298,83 @@ void TIM7_IRQHandler(void)
 /**
  * @brief This function handles LPUART1 global interrupt.
  */
+
+uint8_t isFreqMode = 0;
+uint8_t bufferIndex = 0; 
 void LPUART1_IRQHandler(void)
 {
 	/* USER CODE BEGIN LPUART1_IRQn 0 */
+
+	uint8_t rxData;
+	uint8_t txString[100];//TODO VERIFIY THATS THE MAX SIZE
+	uint8_t txStrSize;
+	char   freqStr[5];
+	uint8_t BUFSIZE = 6;
+	uint8_t rxBuffer[BUFSIZE];
+
+	if(__HAL_UART_GET_FLAG(&hlpuart1, UART_FLAG_RXNE)!=RESET){
+                rxData = hlpuart1.Instance->RDR;
+		if(!isFreqMode){	
+		switch(rxData){ 
+			case 'h':
+				snprintf((char*)txString,96,"Usage:\r\n h\t help command \r\n d\t display current output frequency\r\n f\t change current frequency\r\n");
+				txStrSize = 96;
+			break;
+			case 'd':
+				snprintf(freqStr,5,"%.2f",DFreq);	
+				snprintf((char*)txString,27, "Current frequency:\t %s\r\n", freqStr);//TODO VERIFIY FUNCTIONALITY
+				txStrSize = 26; 
+			break;
+			case 'f':
+				snprintf((char*)txString,24,"Frequency set to: ");
+				txStrSize = 18;
+				snprintf((char*)rxBuffer, BUFSIZE, "000000");
+				isFreqMode = 1;//cheap bool flag
+			break;
+			default:
+				snprintf((char*)txString,18,"Invalid command\n\r");
+				txStrSize = 18;
+			break;
+		}
+		HAL_UART_Transmit(&hlpuart1, txString, txStrSize, 0xFFFF);
+		}
+		else{//TODO READING MULTIPLE RXDATAS UNTIL END OF INPUT
+		switch(rxData){
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+                        case '6':
+                        case '7':
+                        case '8':
+                        case '9':
+                        case '0':
+                        case '.':
+			if(bufferIndex < BUFSIZE - 1){
+				rxBuffer[bufferIndex++] = rxData;
+				rxBuffer[bufferIndex] = '\0';
+				HAL_UART_Transmit(&hlpuart1, &rxData, 1, 0xFFFF);	
+			}
+			break;
+                        case '\r':
+                        case '\n':
+				DFreq = (float32_t)atof((char*)rxBuffer); //TODO VERIFY THIS WORKS
+				HAL_UART_Transmit(&hlpuart1, (uint8_t*)"\n\r", 2, 0xFFFF);	
+                                isFreqMode = 0;
+				bufferIndex = 0;
+                        break;
+                        default:
+				//do nothing 
+                        break;
+		}
+
+
+
+		}
+		__HAL_UART_CLEAR_FLAG(&hlpuart1, UART_FLAG_RXNE);
+        }
+			
 
 	/* USER CODE END LPUART1_IRQn 0 */
 	HAL_UART_IRQHandler(&hlpuart1);
@@ -308,6 +382,15 @@ void LPUART1_IRQHandler(void)
 
 	/* USER CODE END LPUART1_IRQn 1 */
 }
+
+
+int __io_putchar(int ch)
+{
+    /* Support printf over UART */
+    (void) HAL_UART_Transmit(&hlpuart1, (uint8_t *) &ch, 1, 0xFFFF);
+    return ch;
+}
+
 
 /* USER CODE BEGIN 1 */
 

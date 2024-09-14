@@ -85,8 +85,6 @@ uint16_t hasStarted = 0;//Flag for starting
  * @brief  The application entry point.
  * @retval int
  */
-int _io_putchar(int ch);
-int _write(uint8_t *ptr, int len);
 
 
 int main(void)
@@ -108,10 +106,11 @@ int main(void)
 	MX_TIM7_Init();
 
 
-
 	/* Infinite loop */
 	while (1)
 	{
+		//HAL_UART_Transmit(&hlpuart1,(uint8_t*)"Hello World", 11, 100);
+		//HAL_Delay(1000); 
 			
 	}
 }
@@ -161,17 +160,6 @@ void SystemClock_Config(void)
 	}
 }
 
-int __io_putchar(int ch){
-	(void) HAL_UART_Transmit(&hlpuart1, (unsigned char *)&ch, 1, 0xFFFFU);
-	return ch;
-}
-int _write(uint8_t *ptr, int len)
-{
-	for(int i =0; i < len; i++){
-		(void) __io_putchar(*ptr++);
-	}
-	return len;
-}
 
 
 
@@ -197,6 +185,7 @@ static void MX_LPUART1_UART_Init(void)
 	hlpuart1.Init.Parity = UART_PARITY_NONE;
 	hlpuart1.Init.Mode = UART_MODE_TX_RX;
 	hlpuart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+    	hlpuart1.Init.OverSampling = UART_OVERSAMPLING_16;
 	hlpuart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
 	hlpuart1.Init.ClockPrescaler = UART_PRESCALER_DIV1;
 	hlpuart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
@@ -215,7 +204,9 @@ static void MX_LPUART1_UART_Init(void)
 		Error_Handler();
 	}
 	/* USER CODE BEGIN LPUART1_Init 2 */
-	LPUART1->CR1 |= USART_CR1_RXNEIE | USART_CR1_TXEIE;
+	__HAL_UART_ENABLE_IT(&hlpuart1, UART_IT_RXNE);
+	__HAL_UART_ENABLE_IT(&hlpuart1, UART_IT_TC);
+	//LPUART1->CR1 |= USART_CR1_RXNEIE | USART_CR1_TXEIE;
 
 	/* USER CODE END LPUART1_Init 2 */
 
