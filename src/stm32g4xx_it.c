@@ -302,6 +302,9 @@ void TIM7_IRQHandler(void)
 		cos_c = arm_cos_f32(ThetaV + 4*_PIdiv3);
 
 		if(cos_a >= cos_b && cos_a >= cos_c){
+			Mat[0] = 1;
+			Mat[3] = 0;
+			Mat[6] = 0;
 			V_IN[0] = cos_a;
 			V_IN[1] = cos_b;
 			V_IN[2] = cos_c;
@@ -310,6 +313,9 @@ void TIM7_IRQHandler(void)
 			virt_c = &VMat[6];
 		}
 		else if(cos_b >= cos_a && cos_b >= cos_c){
+			Mat[0] = 0;
+			Mat[3] = 1;
+			Mat[6] = 0;
 			V_IN[0] = cos_b;
 			V_IN[1] = cos_c;
 			V_IN[2] = cos_a;
@@ -318,6 +324,9 @@ void TIM7_IRQHandler(void)
 			virt_c = &VMat[0];
 		}
 		else{
+			Mat[0] = 0;
+			Mat[3] = 0;
+			Mat[6] = 1;
 			V_IN[0] = cos_c;//TODO VERIFY THIS STUFF
 			V_IN[1] = cos_a;
 			V_IN[2] = cos_b;
@@ -344,6 +353,13 @@ void TIM7_IRQHandler(void)
 		virt_c[2] = ((V_BC+V_AC)*v_ac)/DENOM;
 		virt_a[1] = 1 - virt_b[1] - virt_c[1];
 		virt_a[2] = 1 - virt_b[2] - virt_c[2];
+
+		Mat[1] = VMat[1] > triangleWave ? 1 : 0;
+		Mat[2] = VMat[2] > triangleWave ? 1 : 0;
+		Mat[7] = VMat[7] > 1 - triangleWave ? 1 : 0; 
+		Mat[8] = VMat[8] > 1 - triangleWave ? 1 : 0; 
+		Mat[4] = (!Mat[1] && !Mat[7])?1:0;
+		Mat[5] = (!Mat[2] && !Mat[8])?1:0;
 		
 
 		//TODO IF Theta
@@ -375,8 +391,8 @@ void LPUART1_IRQHandler(void)
 		if(!isFreqMode){	
 		switch(rxData){ 
 			case 'h':
-				snprintf((char*)txString,144,"Usage:\r\n h\t help command \r\n d\t display current output frequency\r\n m\t display virtual matrix\r\n t\t display thetaC\r\n f\t change current frequency\r\n");
-				txStrSize = 144;//TODO VERIFY
+				snprintf((char*)txString,88,"Usage:\r\n h\t help \r\n d\t output frequency\r\n m\t matrix\r\n t\t thetaC\r\n f\t change frequency\r\n");
+				txStrSize = 88;//TODO VERIFY
 			break;
 			case 'd':
 				snprintf(freqStr,5,"%.2f",DFreq);	
@@ -389,14 +405,14 @@ void LPUART1_IRQHandler(void)
 				snprintf((char*)rxBuffer, BUFSIZE, "000000");
 				isFreqMode = 1;//cheap bool flag
 			break;
-			case 't':
+			case 'c':
 				snprintf(freqStr,10,"%.4f",ThetaC);
 				snprintf((char*)txString,27, "Current ThetaC:\t %s\r\n", freqStr);
 				txStrSize = 26; 
 			break;
 			case 'm':
-				txStrSize = 70;
-				snprintf((char*)txString,txStrSize, "[ %.1f %.1f %.1f ]%.1f \r\n[ %.1f %.1f %.1f ]%.1f \r\n[ %.1f %.1f %.1f ]%.1f\r\n",VMat[0], VMat[1], VMat[2],V_IN[0],VMat[3], VMat[4], VMat[5],V_IN[1], VMat[6], VMat[7], VMat[8],V_IN[2]);
+				snprintf((char*)txString,35,"[%d %d %d ] \r\n[%d %d %d ] \r\n[%d %d %d ] \r\n\n",Mat[0], Mat[1], Mat[2],Mat[3], Mat[4], Mat[5], Mat[6],Mat[7], Mat[8]);
+				txStrSize = 35;	
 			break;
 			default:
 				snprintf((char*)txString,18,"Invalid command\n\r");

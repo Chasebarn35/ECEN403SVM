@@ -65,7 +65,6 @@ static void MX_TIM7_Init(void);
 /* USER CODE BEGIN 0 */
 
 float32_t ThetaV = 0, ThetaC = 0;
-float32_t counterfrequency = 150000000;
 float32_t cosinevalue = 0;
 float32_t cos_a = 0, cos_b = 0, cos_c = 0;
 float32_t DFreq = 60;//TODO REPLACE WITH UART COMMUNICATION
