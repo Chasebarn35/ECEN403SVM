@@ -21,6 +21,8 @@ INCLUDES  = -I$(INC_DIR)
 ASM_FILES += $(VENDOR_ROOT)Drivers/CMSIS/Device/ST/STM32G4xx/Source/Templates/gcc/startup_stm32g431xx.s
 #SRC_FILES += $(VENDOR_ROOT)Drivers/CMSIS/Device/ST/STM32G4xx/Source/Templates/system_stm32g4xx.c
 SRC_FILES += $(VENDOR_ROOT)Drivers/BSP/STM32G4xx_Nucleo/stm32g4xx_nucleo.c #TODO CHECK
+SRC_FILES += $(VENDOR_ROOT)Drivers/CMSIS/DSP/Source/CommonTables/arm_common_tables.c
+SRC_FILES += $(VENDOR_ROOT)Drivers/CMSIS/DSP/Source/FastMathFunctions/arm_cos_f32.c
 SRC_FILES += $(VENDOR_ROOT)Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal.c
 SRC_FILES += $(VENDOR_ROOT)Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_cortex.c
 SRC_FILES += $(VENDOR_ROOT)Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_dma.c
@@ -49,6 +51,7 @@ CFLAGS  = -g -O0 -Wall -Wextra -Warray-bounds -Wno-unused-parameter
 CFLAGS += -mcpu=cortex-m7 -mthumb -mlittle-endian -mthumb-interwork 
 CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 #TODO CHECK
 CFLAGS += -DSTM32G431xx -DUSE_STM32G4XX_NUCLEO_144 -DUSE_HAL_DRIVER 
+CFLAGS += -DARM_ALL_FAST_TABLES -DARM_TABLE_SIN_F32 -DARM_DSP_CONFIG_TABLES -DARM_FAST_ALLOW_TABLES
 CFLAGS += $(INCLUDES) 
 
 LFLAGS = -Wl,--gc-sections -Wl,-T$(LD_SCRIPT) --specs=rdimon.specs

@@ -64,21 +64,28 @@ static void MX_TIM7_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-float32_t U_alpha=200, U_beta=0;
 float32_t ThetaV = 0, ThetaC = 0;
 float32_t counterfrequency = 150000000;
-float32_t U_max = (1/_SQRT3)*_U_DC;
-float32_t sinevalue=0,cosinevalue=0;
+float32_t cosinevalue = 0;
+float32_t cos_a = 0, cos_b = 0, cos_c = 0;
 float32_t DFreq = 60;//TODO REPLACE WITH UART COMMUNICATION
-uint16_t *switchtime[3] = {0,0,0}; 
+float32_t V_AB = 0;
+float32_t V_BC = 0;
+float32_t V_AC = 0;
+float32_t v_ab = 0;
+float32_t v_ac = 0;
+float32_t DENOM = 0;
+float32_t triangleWave = 0;
+float32_t* virt_a;
+float32_t* virt_b;
+float32_t* virt_c;
+float32_t V_IN[3] = {0,0,0};
+float32_t VMat[9] = {0,0,0, 0,0,0, 0,0,0};
+uint16_t Mat[9]   = {0,0,0, 0,0,0, 0,0,0};
 uint16_t adrT = 0;
-uint16_t SVM[180] = { //180 different instances TODO
-	0x01,0x02,0x03,0x02,0x01,//Aa->Ab->Ac->Ab->Aa
-	0x04,0x08,0x0C,0x08,0x04,//Ba->Bb->Bc->Bb->Ba
-	0x10,0x20,0x30,0x20,0x10 //Ca->Cb->Cc->Cb->Ca
-	};//TODO FINISH COUNT, POTENTIALLY MOVE TO .DATA SECTION
 uint16_t currVec = 0;
 uint16_t hasStarted = 0;//Flag for starting
+uint16_t triangle = 1;//Flag for triangle
 /* USER CODE END 0 */
 
 /**
@@ -135,7 +142,7 @@ void SystemClock_Config(void)
 	RCC_OscInitStruct.HSEState = RCC_HSE_ON;
 	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
 	RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-	RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV4;
+	RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV2;
 	RCC_OscInitStruct.PLL.PLLN = 25;
 	RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
 	RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
@@ -246,7 +253,7 @@ static void MX_TIM6_Init(void)
 		Error_Handler();
 	}
 	/* USER CODE BEGIN TIM6_Init 2 */
-	HAL_TIM_Base_Start(&htim6);
+	HAL_TIM_Base_Start_IT(&htim6);
 
 	/* USER CODE END TIM6_Init 2 */
 
@@ -286,7 +293,7 @@ static void MX_TIM7_Init(void)
 		Error_Handler();
 	}
 	/* USER CODE BEGIN TIM7_Init 2 */
-	HAL_TIM_Base_Start(&htim7);
+	HAL_TIM_Base_Start_IT(&htim7);
 
 	/* USER CODE END TIM7_Init 2 */
 

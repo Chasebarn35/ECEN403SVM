@@ -30,6 +30,7 @@
 
 #include <stdlib.h> //atof
 #include <stdio.h> //snprintf
+#include <arm_math.h>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

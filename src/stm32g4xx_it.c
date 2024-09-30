@@ -21,6 +21,7 @@
 #include "main.h"
 #include "stm32g4xx_it.h"
 #include "algos.h"
+#include "arm_math.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
@@ -213,9 +214,8 @@ void EXTI9_5_IRQHandler(void)
 		HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON,PWR_STOPENTRY_WFI);
 	}
 
-	if(__HAL_GPIO_EXTI_GET_IT(V_c_Pin)!=RESET){
+	if(__HAL_GPIO_EXTI_GET_IT(V_c_Pin)!=RESET){ //TODO POTENTIALLY REMOVE?
 		__HAL_GPIO_EXTI_CLEAR_IT(V_c_Pin);
-		//TODO MORE WITH V_C
 	}
 	HAL_GPIO_EXTI_IRQHandler(V_c_Pin);
 }
@@ -260,15 +260,10 @@ void EXTI15_10_IRQHandler(void)
 //10KHz interrupt
 void TIM6_DAC_IRQHandler(void)
 {
+	//HAL_UART_Transmit(&hlpuart1, (uint8_t*)"\r\n", 2, 0xFFFF);//LOL LMAO
 	if(TIM_GET_ITSTATUS(&htim6,TIM_IT_UPDATE)!=RESET){
-		PhaseChange(SVM[5*currVec + adrT]);
-		adrT++;
-		if(adrT>=5){
-			adrT = 0; //TODO make adrT larger, determine adrT
-			currVec++;
-			if(currVec >= 2)
-				currVec = 0;
-					}
+		currVec = Mat[0] | Mat[3] << 1 | Mat[6]*3 | Mat[1] << 2 | Mat[4]<<3 | Mat[7]*3 << 2 | Mat[2] << 4 | Mat[5] << 5 | Mat[8]*3 << 4;
+		PhaseChange(currVec);
 		TIM_GET_CLEAR_IT(&htim6,TIM_IT_UPDATE);
 	}
 }
@@ -281,14 +276,77 @@ void TIM7_IRQHandler(void)
 {
 
 	if(TIM_GET_ITSTATUS(&htim7,TIM_IT_UPDATE)!=RESET){
-		//calculate park transformation
-		//transform Va or Vb
 
-		//TODO IF Theta
-		ThetaV+=(60*M_PI)/50000;//Reset via V_A interrupt pin
-		ThetaC+=(DFreq*M_PI)/50000;//DFreq Increment every 50Khz
+		ThetaV+=(60*2*M_PI)/50000;//Reset via V_A interrupt pin
+		ThetaC+=(DFreq*2*M_PI)/50000;//DFreq Increment every 50Khz
 		if(ThetaC >= (2*M_PI))
 			ThetaC = 0;
+		switch(triangle){
+		case 1:
+		triangleWave += 2500/50000;
+		if(triangleWave >=1) 
+			triangle = 0;
+		break;
+		case 0:
+		triangleWave -= 2500/50000;
+                if(triangleWave <=0)
+                        triangle = 1;
+		break;
+		}
+
+		float32_t cos_a,cos_b,cos_c;
+
+
+		cos_a = arm_cos_f32(ThetaV + _PIdiv3);
+		cos_b = arm_cos_f32(ThetaV + 2*_PIdiv3);
+		cos_c = arm_cos_f32(ThetaV + 4*_PIdiv3);
+
+		if(cos_a >= cos_b && cos_a >= cos_c){
+			V_IN[0] = cos_a;
+			V_IN[1] = cos_b;
+			V_IN[2] = cos_c;
+			virt_a = &VMat[0];
+			virt_b = &VMat[3];	
+			virt_c = &VMat[6];
+		}
+		else if(cos_b >= cos_a && cos_b >= cos_c){
+			V_IN[0] = cos_b;
+			V_IN[1] = cos_c;
+			V_IN[2] = cos_a;
+			virt_a = &VMat[3];
+			virt_b = &VMat[6];
+			virt_c = &VMat[0];
+		}
+		else{
+			V_IN[0] = cos_c;//TODO VERIFY THIS STUFF
+			V_IN[1] = cos_a;
+			V_IN[2] = cos_b;
+                        virt_a = &VMat[6];
+			virt_b = &VMat[0];
+			virt_c = &VMat[3];
+		}
+
+		V_AB = _U_IN * (V_IN[0] - V_IN[1]);
+		V_BC = _U_IN * (V_IN[1] - V_IN[2]);
+		V_AC = _U_IN * (V_IN[0] - V_IN[2]);
+
+		DENOM = V_AB*V_AB + V_AC*V_AC + V_BC*V_BC;
+		cosinevalue = arm_cos_f32(ThetaV + _PIdiv3);
+		v_ab = -_U_OUT * _SQRT3 * cosinevalue;
+		cosinevalue = arm_cos_f32(ThetaV + 2*_PIdiv3);
+		v_ac = -_U_OUT * _SQRT3 * cosinevalue;//TODO DETERMINE _U_OUT
+		virt_a[0] = 1;
+		virt_b[0] = 0;
+		virt_c[0] = 0;
+		virt_b[1] = ((V_AB-V_BC)*v_ab)/DENOM;//TODO DETERMINE SPEED OF CALCULATIONS
+		virt_b[2] = ((V_AB-V_BC)*v_ac)/DENOM;
+		virt_c[1] = ((V_BC+V_AC)*v_ab)/DENOM;
+		virt_c[2] = ((V_BC+V_AC)*v_ac)/DENOM;
+		virt_a[1] = 1 - virt_b[1] - virt_c[1];
+		virt_a[2] = 1 - virt_b[2] - virt_c[2];
+		
+
+		//TODO IF Theta
 		TIM_GET_CLEAR_IT(&htim7,TIM_IT_UPDATE);
 	}
 }
@@ -317,12 +375,12 @@ void LPUART1_IRQHandler(void)
 		if(!isFreqMode){	
 		switch(rxData){ 
 			case 'h':
-				snprintf((char*)txString,96,"Usage:\r\n h\t help command \r\n d\t display current output frequency\r\n f\t change current frequency\r\n");
-				txStrSize = 96;
+				snprintf((char*)txString,144,"Usage:\r\n h\t help command \r\n d\t display current output frequency\r\n m\t display virtual matrix\r\n t\t display thetaC\r\n f\t change current frequency\r\n");
+				txStrSize = 144;//TODO VERIFY
 			break;
 			case 'd':
 				snprintf(freqStr,5,"%.2f",DFreq);	
-				snprintf((char*)txString,27, "Current frequency:\t %s\r\n", freqStr);//TODO VERIFIY FUNCTIONALITY
+				snprintf((char*)txString,27, "Current frequency:\t %s\r\n", freqStr);
 				txStrSize = 26; 
 			break;
 			case 'f':
@@ -330,6 +388,15 @@ void LPUART1_IRQHandler(void)
 				txStrSize = 18;
 				snprintf((char*)rxBuffer, BUFSIZE, "000000");
 				isFreqMode = 1;//cheap bool flag
+			break;
+			case 't':
+				snprintf(freqStr,10,"%.4f",ThetaC);
+				snprintf((char*)txString,27, "Current ThetaC:\t %s\r\n", freqStr);
+				txStrSize = 26; 
+			break;
+			case 'm':
+				txStrSize = 70;
+				snprintf((char*)txString,txStrSize, "[ %.1f %.1f %.1f ]%.1f \r\n[ %.1f %.1f %.1f ]%.1f \r\n[ %.1f %.1f %.1f ]%.1f\r\n",VMat[0], VMat[1], VMat[2],V_IN[0],VMat[3], VMat[4], VMat[5],V_IN[1], VMat[6], VMat[7], VMat[8],V_IN[2]);
 			break;
 			default:
 				snprintf((char*)txString,18,"Invalid command\n\r");

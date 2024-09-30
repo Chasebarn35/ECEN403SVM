@@ -43,21 +43,36 @@ extern "C" {
 /* USER CODE BEGIN EC */
 
 #define _U_DC 208
+#define _U_IN 120
+#define _U_OUT 100
 #define _SQRT3 1.73205081
 #define _PIdiv3 1.04719755
+#define _PI 3.14159265
 
 
-extern float32_t U_alpha, U_beta;
 extern float32_t ThetaV, ThetaC;
 extern float32_t counterfrequency;
-extern float32_t U_max;
-extern float32_t sinevalue,cosinevalue;
+extern float32_t cosinevalue;
+extern float32_t cos_a;
+extern float32_t cos_b;
+extern float32_t cos_c;
 extern float32_t DFreq;
-extern uint16_t *switchtime[3];
-extern uint16_t adrT;
-extern uint16_t SVM[180];
+extern float32_t V_AB;
+extern float32_t V_BC;
+extern float32_t V_AC;
+extern float32_t v_ab;
+extern float32_t v_ac;
+extern float32_t DENOM;
+extern float32_t VMat[9];
+extern float32_t V_IN[3];
+extern float32_t* virt_a;
+extern float32_t* virt_b;
+extern float32_t* virt_c;
+extern float32_t triangleWave;
+extern uint16_t Mat[9];
 extern uint16_t currVec;
 extern uint16_t hasStarted;
+extern uint16_t triangle;
 
 /* USER CODE END EC */
 
